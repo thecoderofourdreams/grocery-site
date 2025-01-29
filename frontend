@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supermarket Price Checker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        .sidebar {
+            background-color: black;
+            width: 250px;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            padding: 20px;
+            color: white;
+        }
+
+        .sidebar h2 {
+            text-align: center;
+        }
+
+        .sidebar ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .sidebar ul li {
+            margin: 10px 0;
+            text-align: center;
+        }
+
+        .sidebar ul li a {
+            color: white;
+            text-decoration: none;
+        }
+
+        .container {
+            margin-left: 260px;
+            padding: 20px;
+        }
+
+        select, input {
+            padding: 10px;
+            width: 100%;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            width: 100%;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background-color: #218838;
+        }
+
+        #results {
+            margin-top: 20px;
+        }
+
+        #developerAccess {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h2>Menu</h2>
+        <ul>
+            <li><a href="#">Home</a></li>
+            <li><a href="#">About</a></li>
+            <li><a href="#">Contact</a></li>
+        </ul>
+    </div>
+
+    <div class="container">
+        <h1>Supermarket Price Checker</h1>
+        <select id="supermarket">
+            <option value="eurospin">Eurospin</option>
+            <option value="conad">Conad</option>
+            <option value="ins">INS</option>
+            <option value="dipiu">Di Più</option>
+        </select>
+        <input type="text" id="city" placeholder="Inserisci la città">
+        <input type="text" id="shoppingList" placeholder="Lista della spesa (separata da virgole)">
+        <button onclick="fetchPrices()">Trova le migliori offerte</button>
+
+        <div id="results"></div>
+    </div>
+
+    <div id="developerAccess" hidden>
+        <input type="password" id="devPassword" placeholder="Inserisci la password">
+        <button onclick="checkDeveloperAccess()">Accedi</button>
+    </div>
+
+    <script>
+        async function fetchPrices() {
+            const supermarket = document.getElementById('supermarket').value;
+            const city = document.getElementById('city').value;
+            const shoppingList = document.getElementById('shoppingList').value.split(',').map(item => item.trim());
+            const resultsDiv = document.getElementById('results');
+
+            resultsDiv.innerHTML = '<p>Caricamento...</p>';
+
+            try {
+                const response = await fetch(`/api/fetchPrices?supermarket=${supermarket}&city=${city}&shoppingList=${shoppingList.join(',')}`);
+                const data = await response.json();
+
+                let output = '<h2>Offerte Migliori</h2><ul>';
+                let totalPrice = 0;
+
+                data.offers.forEach(item => {
+                    output += `<li>${item.item}: ${item.price}€ in offerta presso ${item.store}</li>`;
+                    totalPrice += parseFloat(item.price);
+                });
+
+                output += `</ul><h3>Totale stimato: ${totalPrice.toFixed(2)}€</h3>`;
+                
+                resultsDiv.innerHTML = output;
+            } catch (error) {
+                console.error("Errore nel recupero dati:", error);
+                resultsDiv.innerHTML = '<p>Errore nel recupero dei dati.</p>';
+            }
+        }
+
+        function checkDeveloperAccess() {
+            const password = document.getElementById('devPassword').value;
+            if (password === "superSecure123") {
+                window.location.href = '/developer-dashboard';
+            }
+        }
+    </script>
+</body>
+</html>
