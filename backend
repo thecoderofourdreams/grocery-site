@@ -1,0 +1,49 @@
+import json
+import requests
+
+def handler(request):
+    supermarket = request.args.get("supermarket")
+    city = request.args.get("city")
+    shopping_list = request.args.get("shoppingList")
+
+    # API endpoint where we will send the request
+    api_url = f"https://api.example.com/prices?supermarket={supermarket}&city={city}&items={shopping_list}"
+
+    # Your provided API key
+    api_key = "AIzaSyC0Iv6OVU9F0FMBtUkE-hrg1ouCvOvCgnQ"
+
+    # Headers for the API request
+    headers = {
+        "Authorization": f"Bearer {api_key}"
+    }
+
+    # Make a request to the API
+    try:
+        response = requests.get(api_url, headers=headers)
+        if response.status_code == 200:
+            data = response.json()
+            # Return the data fetched from the API
+            return {
+                "statusCode": 200,
+                "body": json.dumps(data),
+                "headers": {
+                    "Content-Type": "application/json"
+                }
+            }
+        else:
+            return {
+                "statusCode": 500,
+                "body": json.dumps({"error": "Failed to fetch data from the API"}),
+                "headers": {
+                    "Content-Type": "application/json"
+                }
+            }
+    except Exception as e:
+        # In case of any exceptions during the API call
+        return {
+            "statusCode": 500,
+            "body": json.dumps({"error": str(e)}),
+            "headers": {
+                "Content-Type": "application/json"
+            }
+        }
